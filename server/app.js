@@ -2,79 +2,75 @@
 const express = require('express'); // The express.js library for implementing the API
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
-const mongoose = require('mongoose');
 const cors = require('cors');
 
-/**** Configuration ****/
+const mongoose = require('mongoose');
 const appName = "Express API Template"; // Change the name of your server app!
 const port = process.env.PORT || 8080; // Pick port 8080 if the PORT env variable is empty.
 const app = express(); // Get the express app object.
+const path = require('path');
 
 app.use(bodyParser.json()); // Add middleware that parses JSON from the request body.
 app.use(morgan('combined')); // Add middleware that logs all http requests to the console.
 app.use(cors()); // Avoid CORS errors. https://en.wikipedia.org/wiki/Cross-origin_resource_sharing
-
-/**** Database Connection ****/
-const mongoDB = "mongodb+srv://maria:rehgar123@cluster0.e7roh.mongodb.net/test";
-mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true })
-.then( async() => {await app.listen(port)
-console.log('The database is now connected!')} )
-.catch(err => console.log(err));
-
-/***Database schema***/
-const Schema = mongoose.Schema;
-
-let item;
-
-let itemSchema = new Schema ({
-    title: String,
-    description: String, 
-    item: [{
-    date: Date,
-    bid: Number
-}]
-});
-
-let UserSchema = new Schema ({
-    user: {
-    name: String,
-    username: String,
-    password: String
-    }
-});
-
-
-// This model is used in the methods of this class to access kittens
-item = mongoose.model('itemModel', itemSchema);
-
-const userModel = mongoose.model('userModel', UserSchema);
-
-
+app.use(express.static('../client/build'));
 
 /**** Routes ****/
-
-// Return all recipes in data
 app.get('/api/items', (req, res) => {
-    item.find({}, (error, items) => {
+    Item.find({}, (error, items) => {
         res.json(items)})
-})
-
-// PostAnswer
-app.post('/api/items/:id/bids', (req, res) => {
-    const id = parseInt(req.params.id);
-    const text = req.body.text;
-    const item = items.find(a => a._id === id);
-    item.bids.push(text);
-    console.log(item);
-    res.json({msg: "Bid placed", item: item});
 });
 
-app.post('/api/items/newauction', (req, res) => {
+app.post('/api/items/:id/bids', async (req, res) => {
+    const id = req.params.id;
     const text = req.body.text;
-    let item = new test({title:text, description:text, item:[]});
+    let bidWinner = parseInt(text);
+    const item = await Item.findById(id)
+    if(item.bids[item.bids.length-1].bidAmount > bidWinner){
+        res.json({isBidTheHighest: "Please bid higher than the current winning bid!"})
+    }
+    else{
+        item.bids.push({bidAmount: bidWinner, date: Date.now()});
+        item.save();
+        console.log(item);
+        res.json({msg: "Bid posted!", item: item});
+    }
+});
+app.post('/api/items/newitem', (req, res) => {
+    const text = req.body.text;
+    let item = new Item({title: text, desc: text, bids:[{bidAmount:0, date: Date.now()}]});
     item.save();
 
-    res.json({msg: "Auction added", item})
+    res.json({msg: "Your item has been added", item: item})
 
-})
+});
 
+let Item;
+let User;
+const itemSchema = new mongoose.Schema({
+    title: String,
+    desc: String,
+    bids: [{
+        bidAmount: Number,
+        date: Date
+    }]
+});
+const userSchema = new mongoose.Schema({
+    userName: String,
+    password: String,
+    fullName: String,
+    creationDate: Date
+});
+
+Item = mongoose.model('item', itemSchema);
+User = mongoose.model('user', userSchema);
+
+app.get('*', (req, res) =>
+    res.sendFile(path.resolve('..','client','build','index.html'))
+);
+
+const databaseUrl = "mongodb+srv://maria:rehgar123@cluster0.e7roh.mongodb.net/test";
+mongoose.connect(databaseUrl, {useNewUrlParser: true, useUnifiedTopology: true}).then(async() => {
+        await app.listen(port);
+        console.log("Database is now connected to:", mongoose.connection.name)
+    }).catch(error => console.error(error));

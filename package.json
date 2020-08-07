@@ -12,5 +12,17 @@
   },
   "eslintConfig": {
     "extends": "react-app"
-  }
+  },
+  "description": "This is a small template for building MERN applications that can be deployed directly to Heroku using git.",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mkr060396/auctionpageMaster.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mkr060396/auctionpageMaster/issues"
+  },
+  "homepage": "https://github.com/mkr060396/auctionpageMaster#readme"
 }

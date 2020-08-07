@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {Router} from "@reach/router";
 import Items from "./Items";
 import Item from "./Item";
+import Login from "./Login";
 
 class App extends Component {
     // API url from the file '.env' OR the file '.env.development'.
@@ -11,31 +12,32 @@ class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            Items: []
+            items: []
         };
     }
 
     componentDidMount() {
         // Get everything from the API
-        this.getItems().then(() => console.log("Auction created"));
+        this.getItems().then(() => console.log("Item created"));
     }
 
     async getItems() {
-        let url = `http://localhost:8080/api/items`; // URL of the API.
+        let url = `${this.API_URL}/items`; // URL of the API.
         let result = await fetch(url); // Get the data
-        let items = await result.json(); // Turn it into json
-        this.setState({ // Set it in the state
-            Items: items
+        let item = await result.json(); // Turn it into json
+        return this.setState({ // Set it in the state
+            items: item
         })
     }
 
     getItem(id) {
-        const item = this.state.Items.find(a => a._id === id);
+        const item = this.state.items.find(i => i._id === id);
         return item;
     }
 
-    async placeBid(id, text) {
-        console.log("placeBid", id, text);
+    async postBid(id, text) {
+        console.log("postBid", id, text);
+
         const url = `http://localhost:8080/api/items/${id}/bids`;
 
         const response = await fetch(url, {
@@ -48,14 +50,14 @@ class App extends Component {
             })
         });
         const data = await response.json();
-        console.log("Printing the response:", data);
+        console.log("Printing response as:", data);
 
         this.getItems();
     }
 
     async addItem(text) {
-        console.log("addItem", text);
-        const url = 'http://localhost:8080/api/items/newauction';
+        console.log("addItem: ", text);
+        const url = `http://localhost:8080/api/items/newitem`;
         const response = await fetch(url, {
             headers: {
                 'Content-Type': 'application/json'
@@ -66,22 +68,24 @@ class App extends Component {
             })
         });
         const data = await response.json();
-        console.log("Printing the response:", data);
+        console.log("Printing response as:", data);
         this.getItems();
     }
 
     render() {
         return (
             <>
-                <h1>Online Auction House</h1>
+                <h1>Item Auction</h1>
                 <Router>
-                    <Items path="/" data={this.state.Items}
-                               addItem={(text) => this.addItem(text)}
+                    <Items path="/" data={this.state.items}
+                           addItem={(text) => this.addItem(text)}
                     ></Items>
                     <Item path="/Item/:id"
-                              getItem={id => this.getItem(id)}
-                              postBid={(id, text) => this.postBid(id, text)}
+                          getItem={id => this.getItem(id)}
+                          postBid={(id, text) => this.postBid(id, text)}
                     ></Item>
+                    <Login path="/login">
+                    </Login>
                 </Router>
             </>
         );

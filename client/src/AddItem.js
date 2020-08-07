@@ -23,7 +23,7 @@ class AddItem extends Component {
         return (
             <>
                 <input name="items" onChange={event => this.onChange(event)} type="text"/>
-                <button onClick={_ => this.onSubmit()}>Add auction</button>
+                <button onClick={_ => this.onSubmit()}>Add item for auction</button>
             </>
         );
     }

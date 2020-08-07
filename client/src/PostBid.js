@@ -23,7 +23,7 @@ class PostBid extends Component {
         return (
             <>
                 <input name="input" onChange={event => this.onChange(event)} type="text"/>
-                <button onClick={_ => this.onSubmit()}>Place Bid</button>
+                <button onClick={_ => this.onSubmit()}>Post my bid</button>
             </>
         )
     }

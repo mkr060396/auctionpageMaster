@@ -1,29 +1,30 @@
 import React, {Component} from 'react';
 import {Link} from "@reach/router";
 import PostBid from "./PostBid";
-import moment from "moment"
+import Moment from "moment"
 
 class Item extends Component {
     render() {
         const id = this.props.id;
-        const itemContent = this.props.getItem(id);
-        let innerContent = <p>Loading</p>;
-        let meh = []
-        if (itemContent) {
-            
-            for(let i = 0; i < itemContent.item.length; i++ ){
-            meh.push(<li>{itemContent.item[i].userName} {itemContent.item[i].bid}
-            {moment(itemContent.item[i].date).format('d MMMM, YYYY')}</li>)
+        const content = this.props.getItem(id);
+        let subContent = <p>Loading...</p>;
+        let list = [];
+        if (content) {
+            for(let i = 0;i < content.bids.length; i++){
+            list.push(<li>{content.bids[i].bidAmount} kr. - {Moment(content.bids[i].date).format('MM Do YY, h:mm:ss')}</li>)
             }
-            
-            innerContent =
+            subContent =
                 <>
-                    <h1>{itemContent.title}</h1>
-                    <section>{itemContent.description}</section>
+                    <h1>
+                        {content.title}
+                    </h1>
+                    <p>
+                        {content.desc}
+                    </p>
 
-                    <h3>Bids</h3>
+                    <h3>Item bids</h3>
                     <ul>
-                        {meh}
+                        {list}
                     </ul>
 
                     <Link to="/">Back</Link>
@@ -31,8 +32,8 @@ class Item extends Component {
         }
         return (
             <>
-                <p>{innerContent}</p>
-                <h3>Place a bid</h3>
+                <p>{subContent}</p>
+                <h3>Post bid on this item</h3>
 
                 <PostBid id={id} postBid={(id, title) => this.props.postBid(id, title)}/>
             </>
